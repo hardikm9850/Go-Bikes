@@ -35,7 +35,8 @@ func prepareConnection(db *gorm.DB) {
 
 	// init Gin router
 	r := gin.Default()
-	r.POST("/users", userHandler.CreateUser)
+	r.POST("/register", userHandler.RegisterUser)
+	r.POST("/login", userHandler.LoginUser)
 	r.GET("/users", userHandler.GetUsers)
 
 	r.Run(":8080")

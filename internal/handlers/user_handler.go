@@ -19,9 +19,9 @@ func NewUserHandler(userRepository repository.UserRepository, db *gorm.DB) *User
 	return &UserHandler{userRepository: userRepository, db: db}
 }
 
-func (h *UserHandler) CreateUser(c *gin.Context) {
-	var user models.User
-	if err := c.BindJSON(&user); err != nil { // binds the JSON request body to the user variable
+func (h *UserHandler) RegisterUser(c *gin.Context) {
+	var user models.RegistrationRequest
+	if err := c.ShouldBindJSON(&user); err != nil { // binds the JSON request body to the user variable
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -32,9 +32,9 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	// Encrypt the password through hashing algorithm
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-			// Handle error
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+		// Handle error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	user.Password = string(hashedPassword) // update the user's password with hashed one
 
@@ -49,7 +49,6 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 }
 
-
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	// using the database instance, we try to create the user
 	users, err := h.userRepository.GetAllUsers(h.db)
@@ -58,4 +57,13 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, users)
+}
+
+func (h *UserHandler) LoginUser(c *gin.Context) {
+	var loginRequest models.LoginRequest
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	h.userRepository.LoginUser(h.db, loginRequest)
 }

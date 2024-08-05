@@ -41,7 +41,7 @@ func Connect() (*gorm.DB, error) {
 
 func Migrate(db *gorm.DB) error {
 	// Drop the table
-	err := db.Migrator().DropTable(&models.User{})
+	err := db.Migrator().DropTable(&models.RegistrationRequest{})
 	if err != nil {
 		return err
 	}
