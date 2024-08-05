@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"go_bikes/internal/auth"
 	"go_bikes/internal/models"
 
 	"github.com/go-playground/validator"
@@ -13,7 +14,7 @@ var validate = validator.New()
 
 type UserRepository interface {
 	CreateUser(db *gorm.DB, registration models.RegistrationRequest) error
-	LoginUser(db *gorm.DB, login models.LoginRequest) error
+	LoginUser(db *gorm.DB, login models.LoginRequest) (string, error)
 	GetAllUsers(db *gorm.DB) ([]models.RegistrationRequest, error)
 }
 
@@ -49,21 +50,30 @@ func (u *userRepository) GetAllUsers(db *gorm.DB) ([]models.RegistrationRequest,
 	return users, result.Error
 }
 
-func (u *userRepository) LoginUser(db *gorm.DB, login models.LoginRequest) error {
+func (u *userRepository) LoginUser(db *gorm.DB, login models.LoginRequest) (string, error) {
 	// Check if user exists in the database
-	var dbUser models.RegistrationRequest
+	var dbUser models.User
+
 	result := db.Where("mobile =?", login.Mobile).First(&dbUser)
 	if result.Error != nil {
-		return result.Error
+		return "", result.Error
 	}
 	// Compare the provided password with the hashed one in the database
-	err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(login.Password))
+	var user = dbUser.RegistrationRequest
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
 	if err != nil {
-		return err
+		return "", err
 	}
-	if dbUser.Password != login.Password {
-		return errors.New("invalid credentials")
+	
+	token, err := auth.GenerateToken(user.ID, user.Role)
+	if err != nil {
+		return "", errors.New("failed to generate token")
 	}
-	// TODO assign a jwt token to the user
-	return nil
+	dbUser.Token = token
+
+	if err := db.Save(&dbUser).Error; err != nil {
+		return "", errors.New("Failed to update token for user " + user.Name)
+	}
+
+	return token, nil
 }

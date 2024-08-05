@@ -1,9 +1,15 @@
 package models
 
+import "fmt"
+
 type User struct {
 	//To embed a struct within another struct without GORM treating it as a separate entity, we use gorm:"embedded" tag
-	RegistrationRequest RegistrationRequest `gorm:"embedded"` 
+	RegistrationRequest RegistrationRequest `gorm:"embedded"`
 	Token               string              `json:"`
+}
+
+func (u User) String() string {
+	return fmt.Sprintf("[%s, %s, %s, %s]", &u.RegistrationRequest.Name, u.RegistrationRequest.Email, u.RegistrationRequest.Mobile, u.RegistrationRequest.Password)
 }
 
 type RegistrationRequest struct {
