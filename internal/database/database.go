@@ -55,7 +55,7 @@ func Migrate(db *gorm.DB) error {
 }
 
 func getDSN() string {
-	pwd, err := os.Getwd()
+	/* pwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
@@ -63,13 +63,13 @@ func getDSN() string {
 	err = godotenv.Load(filepath.Join(pwd, "../.env"))
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
-	}
+	} */
 
 	user := utils.GetValueFromKey("MYSQL_USER")
 	password := utils.GetValueFromKey("MYSQL_PASSWORD")
 	host := utils.GetValueFromKey("MYSQL_HOST")
 	port := utils.GetValueFromKey("MYSQL_PORT")
-	dbname := utils.GetValueFromKey("MYSQL_DATABASE")
+	dbname := os.Getenv("MYSQL_DATABASE")
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		user, password, host, port, dbname)
