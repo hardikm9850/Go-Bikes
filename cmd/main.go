@@ -36,7 +36,11 @@ func prepareConnection(db *gorm.DB) {
 
 	// init Gin router
 	r := gin.Default()
-
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
+			"message": "Welcome to the Bike Shop API",
+		})
+	})
 	r.POST("/register", userHandler.RegisterUser)
 	r.POST("/login", userHandler.LoginUser)
 
