@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go_bikes/internal/database"
 	"go_bikes/internal/handlers"
+	"go_bikes/internal/middleware"
 	"go_bikes/internal/repository"
 	"log"
 
@@ -35,9 +36,15 @@ func prepareConnection(db *gorm.DB) {
 
 	// init Gin router
 	r := gin.Default()
+
 	r.POST("/register", userHandler.RegisterUser)
 	r.POST("/login", userHandler.LoginUser)
-	r.GET("/users", userHandler.GetUsers)
+
+	protected := r.Group("/users")
+	protected.Use(middleware.JWTMiddleware())
+	protected.GET("/", func(c *gin.Context) {
+		userHandler.GetUsers(c)
+	})
 
 	r.Run(":8080")
 }

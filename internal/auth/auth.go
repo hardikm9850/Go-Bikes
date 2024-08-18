@@ -1,10 +1,9 @@
 package auth
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"time"
 	"github.com/golang-jwt/jwt/v5"
+	"go_bikes/internal/utils"
 )
 
 type Claims struct {
@@ -24,8 +23,8 @@ func GenerateToken(userID uint, role string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	
-	secretKey, _ := generateSecretKey()
+
+	secretKey, _ := utils.GetSecretKey()
 
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
@@ -33,12 +32,4 @@ func GenerateToken(userID uint, role string) (string, error) {
 	}
 
 	return tokenString, nil
-}
-
-func generateSecretKey() (string, error) {
-	key := make([]byte, 32)
-	if _, err := rand.Read(key); err != nil {
-			return "", err
-	}
-	return base64.URLEncoding.EncodeToString(key), nil
 }

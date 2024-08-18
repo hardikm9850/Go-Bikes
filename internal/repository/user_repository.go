@@ -15,7 +15,7 @@ var validate = validator.New()
 type UserRepository interface {
 	CreateUser(db *gorm.DB, registration models.RegistrationRequest) error
 	LoginUser(db *gorm.DB, login models.LoginRequest) (string, error)
-	GetAllUsers(db *gorm.DB) ([]models.RegistrationRequest, error)
+	GetAllUsers(db *gorm.DB) ([]models.User, error)
 }
 
 type userRepository struct{}
@@ -40,12 +40,11 @@ func (u *userRepository) CreateUser(db *gorm.DB, registration models.Registratio
 	}
 	var newUser models.User
 	newUser.RegistrationRequest = registration
-	newUser.Token = ""
 	return db.Create(&newUser).Error
 }
 
-func (u *userRepository) GetAllUsers(db *gorm.DB) ([]models.RegistrationRequest, error) {
-	var users []models.RegistrationRequest
+func (u *userRepository) GetAllUsers(db *gorm.DB) ([]models.User, error) {
+	var users []models.User
 	result := db.Find(&users)
 	return users, result.Error
 }
@@ -64,13 +63,11 @@ func (u *userRepository) LoginUser(db *gorm.DB, login models.LoginRequest) (stri
 	if err != nil {
 		return "", err
 	}
-	
+
 	token, err := auth.GenerateToken(user.ID, user.Role)
 	if err != nil {
 		return "", errors.New("failed to generate token")
 	}
-	dbUser.Token = token
-
 	if err := db.Save(&dbUser).Error; err != nil {
 		return "", errors.New("Failed to update token for user " + user.Name)
 	}

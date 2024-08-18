@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
+	"go_bikes/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -30,14 +30,14 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 		user.Role = "customer" // default role is customer if not provided
 	}
 	// Encrypt the password through hashing algorithm
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := utils.GenerateHashedString(user.Password)
 	if err != nil {
 		// Handle error
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	user.Password = string(hashedPassword) // update the user's password with hashed one
-	
+
 	// using the database instance, we try to create the user
 	err = h.userRepository.CreateUser(h.db, user)
 	if err != nil {
@@ -67,7 +67,10 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	}
 	token, err := h.userRepository.LoginUser(h.db, loginRequest)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{

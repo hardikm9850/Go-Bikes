@@ -3,9 +3,8 @@ package models
 import "fmt"
 
 type User struct {
-	//To embed a struct within another struct without GORM treating it as a separate entity, we use gorm:"embedded" tag
-	RegistrationRequest RegistrationRequest `gorm:"embedded"`
-	Token               string              `json:"`
+	//To embed a struct within another struct, without GORM treating it as a separate entity, we use gorm:"embedded" tag
+	RegistrationRequest `gorm:"embedded"`
 }
 
 func (u User) String() string {

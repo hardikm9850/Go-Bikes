@@ -1,7 +1,7 @@
 package models
 
 type Vehicle struct {
-	ID           int     `json:"id"`
+	ID           uint   `gorm:"primarykey;autoIncrement"`
 	Model        string  `json:"model"`
 	Year         int     `json:"year"`
 	Type         string  `json:"type"`
