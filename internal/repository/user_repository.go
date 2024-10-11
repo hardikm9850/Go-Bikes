@@ -49,20 +49,20 @@ func (u *userRepository) GetAllUsers(db *gorm.DB) ([]models.User, error) {
 	return users, result.Error
 }
 
-func (u *userRepository) LoginUser(db *gorm.DB, LoginRequest models.LoginRequest) (string, error) {
+func (u *userRepository) LoginUser(db *gorm.DB, loginRequest models.LoginRequest) (string, error) {
 	// Check if user exists in the database
 	var dbUser models.User
 
-	result := db.Where("mobile =?", LoginRequest.Mobile).First(&dbUser)
+	result := db.Where("mobile =?", loginRequest.Mobile).First(&dbUser)
 	if result.Error != nil {
-		return "", result.Error
+		return "", errors.New("user with mobile " + loginRequest.Mobile + " not found")
 	}
 	// Compare the provided password with the hashed one in the database
 	var storedUser = dbUser.RegistrationRequest
 	// compares a bcrypt hashed password with its possible plaintext equivalent.
-	err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(LoginRequest.Password))
+	err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(loginRequest.Password))
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid password")
 	}
 
 	token, err := auth.GenerateToken(storedUser.ID, storedUser.Role)

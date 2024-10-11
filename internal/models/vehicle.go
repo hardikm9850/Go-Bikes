@@ -1,10 +1,10 @@
 package models
 
 type Vehicle struct {
-	ID              uint        `gorm:"primarykey;autoIncrement"`
+	ID              int         `gorm:"primarykey;autoIncrement"`
 	Model           string      `json:"model"`
 	Year            int         `json:"year"`
-	TypeId          int32       `json:"type"`
+	TypeId          int       `json:"type"`
 	Available       bool        `json:"available"`
 	BookedTillDate  string      `json:"booked_till_date"`
 	PricePerHour    float64     `json:"price_per_hour"`

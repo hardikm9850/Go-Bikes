@@ -15,7 +15,7 @@ func (u User) String() string {
 type RegistrationRequest struct {
 	ID            uint   `gorm:"primarykey;autoIncrement"`
 	Name          string `json:"name" validate:"required"`
-	Email         string `json:"email" validate:"required"`
+	Email         string `json:"email" gorm:"type:varchar(255);unique" validate:"required"`
 	Mobile        string `json:"mobile" validate:"required"`
 	Address       string `json:"address" validate:"required"`
 	LicenseNumber string `json:"license_number" validate:"required"`
