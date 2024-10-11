@@ -8,7 +8,8 @@ type User struct {
 }
 
 func (u User) String() string {
-	return fmt.Sprintf("[%s, %s, %s, %s]", &u.RegistrationRequest.Name, u.RegistrationRequest.Email, u.RegistrationRequest.Mobile, u.RegistrationRequest.Password)
+	registration := u.RegistrationRequest
+	return fmt.Sprintf("[%s, %s, %s, %s]", registration.Name, registration.Email, registration.Mobile, registration.Password)
 }
 
 type RegistrationRequest struct {

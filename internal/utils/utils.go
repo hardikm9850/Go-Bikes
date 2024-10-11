@@ -2,11 +2,13 @@ package utils
 
 import (
 	"os"
+	"path/filepath"
 
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
-//var envLoaded bool
+var envLoaded bool
 
 func GetSecretKey() (string, error) {
 	return GetValueFromKey("JWT_SECRET_KEY"), nil
@@ -14,7 +16,7 @@ func GetSecretKey() (string, error) {
 
 func GetValueFromKey(key string) string {
 	// Check if we're in development environment
-	/* isDevelopment := os.Getenv("APP_ENV") == "development"
+	isDevelopment := os.Getenv("APP_ENV") == "development"
 	// Load .env file only in development
 	if isDevelopment && !envLoaded {
 		pwd, err := os.Getwd()
@@ -26,7 +28,7 @@ func GetValueFromKey(key string) string {
 			panic("Error loading .env file")
 		}
 		envLoaded = true
-	} */
+	}
 	return os.Getenv(key)
 }
 

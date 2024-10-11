@@ -18,9 +18,9 @@ func main() {
 }
 
 func prepareDatabase() (db *gorm.DB) {
-	db, err := database.Connect()
+	db, err := database.ConnectDatabase()
 	if err != nil {
-		fmt.Print(err)
+		printError(err)
 		return
 	}
 	err = database.Migrate(db)
@@ -30,10 +30,19 @@ func prepareDatabase() (db *gorm.DB) {
 	return db
 }
 
+func printError(err error) {
+	fmt.Println("Error connecting to database ", err)
+}
+
 func prepareConnection(db *gorm.DB) {
 	userRepository := repository.NewUserRepository()
-	userHandler := handlers.NewUserHandler(userRepository, db)
+	vehicleRepository := repository.NewVehicleRepository()
+	locationRepository := repository.NewLocationRepository()
 
+	userHandler := handlers.NewUserHandler(userRepository, db)
+	vehicleHandler := handlers.NewVehicleHandler(vehicleRepository, db)
+	locationHandler := handlers.NewLocationHandler(locationRepository, db)
+	
 	// init Gin router
 	r := gin.Default()
 	r.GET("/", func(ctx *gin.Context) {
@@ -44,11 +53,23 @@ func prepareConnection(db *gorm.DB) {
 	r.POST("/register", userHandler.RegisterUser)
 	r.POST("/login", userHandler.LoginUser)
 
-	protected := r.Group("/users")
-	protected.Use(middleware.JWTMiddleware())
-	protected.GET("/", func(c *gin.Context) {
+	protectedUser := r.Group("/users")
+	protectedUser.Use(middleware.JWTMiddleware())
+	protectedUser.GET("/", func(c *gin.Context) {
 		userHandler.GetUsers(c)
 	})
+	protectedVehicles := r.Group("/vehicles")
+	protectedVehicles.Use(middleware.JWTMiddleware())
+	protectedVehicles.GET("/", func(c *gin.Context) {
+		vehicleHandler.GetVehicles(c)
+	})
+
+	protectedLocations := r.Group("/locations")
+	protectedLocations.Use(middleware.JWTMiddleware())
+	protectedLocations.GET("/", func(c *gin.Context) {
+        locationHandler.GetLocation(c)
+    })
+	
 
 	r.Run(":8080")
 }

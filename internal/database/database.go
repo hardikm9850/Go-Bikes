@@ -6,17 +6,17 @@ import (
 	"go_bikes/internal/utils"
 	"log"
 	"os"
-
+	"path/filepath"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+//var DB *gorm.DB
 
-func Connect() (*gorm.DB, error) {
-	// dsn stands for data source name. It specifies database location.
+func ConnectDatabase() (*gorm.DB, error) {
 	dsn := getDSN()
 	if dsn == "" {
 		return nil, fmt.Errorf("data source name is empty")
@@ -31,9 +31,7 @@ func Connect() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	sqlDB.Ping()
-	DB = db
 	log.Printf("\nDatabase connection established\n")
 	return db, nil
 }
@@ -45,15 +43,24 @@ func Migrate(db *gorm.DB) error {
 		return err
 	}
 
-	err = db.AutoMigrate(&models.Vehicle{}, &models.User{}, &models.Booking{})
+	err = db.AutoMigrate(&models.Vehicle{}, &models.User{}, &models.Booking{}, &models.VehicleType{}, &models.VehicleLocations{}, &models.Location{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+/**
+    Get the MySQL DSN from the environment variables.
+    If the environment variables are not set, it will panic.
+    Returns the MySQL DSN string.
+    Example:
+    user=your_username
+    password=your_password
+	dsn stands for data source name. It specifies database location.
+*/
 func getDSN() string {
-	/* pwd, err := os.Getwd()
+	pwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +68,7 @@ func getDSN() string {
 	err = godotenv.Load(filepath.Join(pwd, "../.env"))
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
-	} */
+	}
 
 	user := utils.GetValueFromKey("MYSQL_USER")
 	password := utils.GetValueFromKey("MYSQL_PASSWORD")
