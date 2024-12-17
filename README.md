@@ -1,7 +1,3 @@
-Here’s a clean and professional **README** for your **GoBikes** project, emphasizing the learning focus while detailing the key aspects of the app:
-
----
-
 # 🚲 GoBikes - Rent Bike Backend API
 
 GoBikes is a simple backend service designed for a bike rental application. The primary motivation behind this project is to explore **backend engineering**, understand its complexities, and apply key concepts like **database management**, **API development**, and **performance optimization**.
