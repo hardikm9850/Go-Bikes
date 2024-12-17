@@ -1,34 +1,32 @@
 package handlers
 
 import (
-	"go_bikes/internal/repository"
+	"go_bikes/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type LocationHandler struct {
-    locationRepo repository.LocationRepository 
-    db                *gorm.DB
+	locationService services.LocationService
 }
 
 /**
-While technically it's okay to pass LocationHandler by value (without a pointer), 
-passing by pointer is a more common practice when creating handlers. 
-This avoids the need to copy the struct each time and ensures more consistent behavior, 
+While technically it's okay to pass LocationHandler by value (without a pointer),
+passing by pointer is a more common practice when creating handlers.
+This avoids the need to copy the struct each time and ensures more consistent behavior,
 especially if we later decide to modify fields in the handler.
 */
 
-func NewLocationHandler(locationRepo repository.LocationRepository, db *gorm.DB) *LocationHandler {
-    return &LocationHandler{locationRepo: locationRepo, db: db}
+func NewLocationHandler(locationService services.LocationService) *LocationHandler {
+	return &LocationHandler{locationService: locationService}
 }
 
 func (locationHandler *LocationHandler) GetLocation(c *gin.Context) {
-	locations, err := locationHandler.locationRepo.GetLocation(locationHandler.db)
-    if err!= nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, locations)
+	locations, err := locationHandler.locationService.GetLocations()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, locations)
 }

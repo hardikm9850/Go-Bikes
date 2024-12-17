@@ -13,23 +13,26 @@ import (
 var validate = validator.New()
 
 type UserRepository interface {
-	CreateUser(db *gorm.DB, registration models.RegistrationRequest) error
-	LoginUser(db *gorm.DB, login models.LoginRequest) (string, error)
-	GetAllUsers(db *gorm.DB) ([]models.User, error)
+	CreateUser(registration models.RegistrationRequest) error
+	LoginUser(login models.LoginRequest) (string, error)
+	GetAllUsers() ([]models.User, error)
 }
 
-type userRepository struct{}
-
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+type userRepository struct{
+	db *gorm.DB
 }
 
-func (u *userRepository) CreateUser(db *gorm.DB, request models.RegistrationRequest) error {
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{db : db}
+}
+
+func (u *userRepository) CreateUser(  request models.RegistrationRequest) error {
 	err := validate.Struct(request)
 	if err != nil {
 		// Handle validation errors
 		return err
 	}
+	db := u.db
 	var existingUser models.RegistrationRequest
 	db.Where("mobile = ?", request.Mobile).Or("email = ?", request.Email).First(&existingUser)
 	if existingUser.Mobile == request.Mobile {
@@ -43,16 +46,17 @@ func (u *userRepository) CreateUser(db *gorm.DB, request models.RegistrationRequ
 	return db.Create(&newUser).Error
 }
 
-func (u *userRepository) GetAllUsers(db *gorm.DB) ([]models.User, error) {
+func (u *userRepository) GetAllUsers( ) ([]models.User, error) {
 	var users []models.User
+	db := u.db
 	result := db.Find(&users)
 	return users, result.Error
 }
 
-func (u *userRepository) LoginUser(db *gorm.DB, loginRequest models.LoginRequest) (string, error) {
+func (u *userRepository) LoginUser( loginRequest models.LoginRequest) (string, error) {
 	// Check if user exists in the database
 	var dbUser models.User
-
+	db := u.db
 	result := db.Where("mobile =?", loginRequest.Mobile).First(&dbUser)
 	if result.Error != nil {
 		return "", errors.New("user with mobile " + loginRequest.Mobile + " not found")

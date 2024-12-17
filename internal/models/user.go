@@ -20,7 +20,7 @@ type RegistrationRequest struct {
 	Address       string `json:"address" validate:"required"`
 	LicenseNumber string `json:"license_number" validate:"required"`
 	Role          string `json:"role" validate:"oneof=admin customer"` //customer or admin user
-	Password      string `json:"password" validate:"required"`
+	Password      string `json:"-" validate:"required"`
 }
 
 type LoginRequest struct {

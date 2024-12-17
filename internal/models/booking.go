@@ -11,3 +11,8 @@ type Booking struct {
 	TotalPrice float64   `json:"total_price"`
 	Status     string    `json:"status"`
 }
+
+func (Booking) TableName() string {
+	return "bookings"
+}
+

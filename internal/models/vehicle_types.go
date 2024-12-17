@@ -1,7 +1,11 @@
 package models
 
 type VehicleType struct {
-	ID          int    `gorm:"primarykey;autoIncrement"`
+	TypeID          int64    `gorm:"primarykey;autoIncrement"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+func (VehicleType) TableName() string {
+	return "vehicle_types"
 }

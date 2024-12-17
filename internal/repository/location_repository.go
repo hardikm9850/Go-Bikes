@@ -2,21 +2,24 @@ package repository
 
 import (
 	"go_bikes/internal/models"
+
 	"gorm.io/gorm"
 )
 
 type LocationRepository interface {
-	GetLocation(db *gorm.DB) ([]models.Location, error)
+	GetLocation() ([]models.Location, error)
 }
 
-type locationRepository struct {}
-
-func NewLocationRepository() LocationRepository {
-    return &locationRepository{}
+type locationRepository struct {
+	db *gorm.DB
 }
 
-func (locationRepo *locationRepository) GetLocation(db *gorm.DB) ([]models.Location, error) {
+func NewLocationRepository(db *gorm.DB) LocationRepository {
+	return &locationRepository{db: db}
+}
+
+func (locationRepo *locationRepository) GetLocation() ([]models.Location, error) {
 	var location []models.Location
-    result := db.Find(&location)
-    return location, result.Error
+	result := locationRepo.db.Find(&location)
+	return location, result.Error
 }

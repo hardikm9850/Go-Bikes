@@ -26,6 +26,10 @@ func ConnectDatabase() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = Migrate(db)
+	if err != nil {
+		log.Fatal("failed to migrate database", err)
+	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -43,29 +47,37 @@ func Migrate(db *gorm.DB) error {
 		return err
 	}
 
-	err = db.AutoMigrate(&models.Vehicle{}, &models.User{}, &models.Booking{}, &models.VehicleType{}, &models.VehicleLocations{}, &models.Location{})
+	err = db.AutoMigrate(
+		&models.VehicleCost{},
+		&models.Vehicle{},
+		&models.User{},
+		&models.Booking{},
+		&models.VehicleType{},
+		&models.VehicleLocations{},
+		&models.Location{})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-/**
-    Get the MySQL DSN from the environment variables.
-    If the environment variables are not set, it will panic.
-    Returns the MySQL DSN string.
-    Example:
-    user=your_username
-    password=your_password
-	dsn stands for data source name. It specifies database location.
+/*
+*
+
+	    Get the MySQL DSN from the environment variables.
+	    If the environment variables are not set, it will panic.
+	    Returns the MySQL DSN string.
+	    Example:
+	    user=your_username
+	    password=your_password
+		dsn stands for data source name. It specifies database location.
 */
 func getDSN() string {
 	pwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-
-	err = godotenv.Load(filepath.Join(pwd, "../.env"))
+	err = godotenv.Load(filepath.Join(pwd, "/.env"))
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
 	}

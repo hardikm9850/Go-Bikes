@@ -1,31 +1,22 @@
 package handlers
 
 import (
-	"go_bikes/internal/repository"
+	"go_bikes/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type VehicleHandler struct {
-	vehicleRepository repository.VehicleRepository
-	db                *gorm.DB
+	vehicleService services.VehicleService
 }
 
-func NewVehicleHandler(vehicleRepository repository.VehicleRepository, db *gorm.DB) *VehicleHandler {
-	return &VehicleHandler{vehicleRepository: vehicleRepository, db: db}
+func NewVehicleHandler(vehicleService services.VehicleService) *VehicleHandler {
+	return &VehicleHandler{vehicleService: vehicleService}
 }
 
 func (h *VehicleHandler) GetVehicles(c *gin.Context) {
-	vehicles, err := h.vehicleRepository.GetVehicles(h.db)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	// This 'Preload' joins the VehicleType table based on the foreign key relationship specified in our Vehicle model (i.e., TypeId).
-	// The result will be a list of Vehicle records, each with its associated VehicleType populated.
-	// How clever is that
-	err = h.db.Preload("VehicleType").Find(&vehicles).Error
+	vehicles, err := h.vehicleService.GetAllVehicles()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error retrieving vehicles": err.Error()})
 		return
@@ -33,6 +24,24 @@ func (h *VehicleHandler) GetVehicles(c *gin.Context) {
 	// Map the VehicleType data into Vehicle struct
 	for i := range vehicles {
 		vehicles[i].VehicleTypeName = vehicles[i].VehicleType.Name
+	}
+	c.JSON(http.StatusOK, vehicles)
+}
+
+func (h *VehicleHandler) GetVehicleByLocation(c *gin.Context) {
+	locationName := c.Query("name")
+	if locationName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "location name is required"})
+		return
+	}
+	vehicles, err := h.vehicleService.GetVehiclesByLocationName(locationName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "vehicle not found for location " + locationName})
+		return
+	}
+	if vehicles == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No vehicles found for the specified location."})
+		return
 	}
 	c.JSON(http.StatusOK, vehicles)
 }
